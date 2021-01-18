@@ -14,7 +14,6 @@
 
 BLEClient*  pClient;
 
-
 static boolean doConnect = false;
 static boolean connected = false;
 static boolean doScan = false;
