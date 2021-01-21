@@ -14,12 +14,15 @@
 
 BLEClient*  pClient;
 
-
 static boolean doConnect = false;
 static boolean connected = false;
 static boolean doScan = false;
 static BLERemoteCharacteristic* pRemoteCharacteristic;
 static BLEAdvertisedDevice* myDevice;
+int counter = 0;
+int maxVal = 0;
+double addRssi = 0;
+//int arrRssi[4];
 
 static void notifyCallback(
   BLERemoteCharacteristic* pBLERemoteCharacteristic,
@@ -113,6 +116,22 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   } // onResult
 }; // MyAdvertisedDeviceCallbacks
 
+void meanRSSI(int recRssi){
+  double meanRssi = 0;
+  counter++;
+  addRssi += recRssi;
+  if(recRssi >= maxVal){
+    maxVal = recRssi;
+  }
+  if(counter == 5){
+    meanRssi = (addRssi-maxVal)/(counter-1);
+    Serial.println(meanRssi);
+    counter = 0;
+    addRssi = 0;
+    maxVal = 0;
+  }
+}
+
 
 void setup() {
   Serial.begin(115200);
@@ -150,7 +169,8 @@ void loop() {
   // with the current time since boot.
   if (connected) {
     int rssi = pClient->getRssi();
-    Serial.println(rssi);
+    meanRSSI(abs(rssi));
+//    Serial.println(rssi);
   }else if(doScan){
     BLEDevice::getScan()->start(0);  // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
   }
